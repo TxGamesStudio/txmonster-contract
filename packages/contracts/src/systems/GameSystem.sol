@@ -4,6 +4,8 @@ pragma solidity >=0.8.24;
 import { System } from "@latticexyz/world/src/System.sol";
 import { User, UserData, Item, ItemData } from "../codegen/index.sol";
 
+import { Constants } from "../Constants.sol";
+
 contract GameSystem is System {
   uint256 internal entropyNonce = 1;
 
@@ -12,6 +14,11 @@ contract GameSystem is System {
   function catching(uint16[] memory possibleRewards, uint16[] memory percentages) external {
     uint256 length = percentages.length;
     require(possibleRewards.length == length, "length not matched");
+
+    uint16 inventoryCap = User.getInventoryCap(msg.sender);
+    if (inventoryCap == 0) {
+      User.setInventoryCap(msg.sender, Constants.DEFAULT_INVENTORY_CAP);
+    }
 
     uint256 rand = uint256(keccak256(abi.encode(++entropyNonce, msg.sender, block.timestamp, block.prevrandao)));
     uint random = rand % 10_000;
